@@ -1,0 +1,27 @@
+{
+  "generator-react-firebase": {
+    "promptValues": {
+      "githubUser": "plamen1982",
+      "includeRedux": true,
+      "includeFirestore": true,
+      "otherFeatures": [
+        "Continuous Integration config",
+        "Firebase Cloud Messaging",
+        "Firebase Functions (with ESNext support)",
+        "Tests for Firebase Functions (Mocha/Chai or Jest)",
+        "Firebase Analytics",
+        "Error Tracking (Sentry.io)",
+        "Client Side Error Reporting (Stackdriver)"
+      ],
+      "functionsTestTool": "jest",
+      "typescriptCloudFunctions": true,
+      "firebaseKey": "AIzaSyCrN-pwHci4NaLLZ2q0DhtWnRLlc9shFNs",
+      "firebaseProjectId": "ecpfsb-alfa",
+      "messagingSenderId": "817710917944",
+      "appId": "1:817710917944:web:26ea7f2947425cf75bf9cd",
+      "measurementId": "G-11PWTGTMLT",
+      "firebasePublicVapidKey": "BIq5Fzvs9NJfz2oyCdO5t0Ahpv2UoDi4yBRmyEbFTDM0iCMpkLWlzj4Ti9nPR5iAyWkGRqo9lINnO8gZpWBuDhg",
+      "ciProvider": "githubActions"
+    }
+  }
+}

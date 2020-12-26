@@ -1,70 +1,216 @@
-# Getting Started with Create React App
+# ecpfsb-alfa
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[![Build Status][build-status-image]][build-status-url]
+[![Code Coverage][coverage-image]][coverage-url]
+[![License][license-image]][license-url]
+[![Code Style][code-style-image]][code-style-url]
 
-## Available Scripts
+## Table of Contents
 
-In the project directory, you can run:
+1. [Features](#features)
+1. [Requirements](#requirements)
+1. [Getting Started](#getting-started)
+1. [Application Structure](#application-structure)
+1. [Development](#development)
+   1. [Routing](#routing)
+1. [Configuration](#configuration)
+1. [Production](#production)
+1. [Deployment](#deployment)
 
-### `yarn start`
+## Requirements
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- node `^12.18.0`
+- npm `^6.0.0`
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Getting Started
 
-### `yarn test`
+1. Install app and functions dependencies: `npm i && npm i --prefix functions`
+1. Create `.env.local` file that looks like so if it does not already exist:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+   ```shell
+    # Needed to skip warnings from jest@beta in package.json
+    SKIP_PREFLIGHT_CHECK=true
 
-### `yarn build`
+    FIREBASE_PROJECT_ID="<- projectId from Firebase Console ->"
+    FIREBASE_API_KEY="<- apiKey from Firebase Console ->"
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    # App environment
+    REACT_APP_FIREBASE_apiKey=$FIREBASE_API_KEY
+    REACT_APP_FIREBASE_authDomain="<- authdomain from Firebase Console ->"
+    REACT_APP_FIREBASE_databaseURL="<- databaseURL from Firebase Console ->"
+    REACT_APP_FIREBASE_projectId=$FIREBASE_PROJECT_ID
+    REACT_APP_FIREBASE_storageBucket="<- storageBucket from Firebase Console ->"
+    REACT_APP_FIREBASE_messagingSenderId="<- messagingSenderId from Firebase Console ->"
+    REACT_APP_FIREBASE_measurementId="<- measurementId from Firebase Console ->"
+    REACT_APP_FIREBASE_appId="<- appId from Firebase Console ->"
+    REACT_APP_PUBLIC_VAPID_KEY="<- public vapid key from messaging tab of Firebase Console ->"
+    REACT_APP_SENTRY_DSN=""
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Start Development server: `yarn start`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+While developing, you will probably rely mostly on `yarn start`; however, there are additional scripts at your disposal:
 
-### `yarn eject`
+| `yarn <script>`     | Description                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `start`             | Serves your app at `localhost:3000` with automatic refreshing and hot module replacement                                |
+| `start:dist`        | Builds the application to `./build` then serves at `localhost:3000` using firebase hosting emulator                     |
+| `start:emulate`     | Same as `start`, but pointed to database emulators (make sure to call `emulators` first to boot up emulators)           |
+| `build`             | Builds the application to `./build`                                                                                     |
+| `test`              | Runs unit tests with Jest. See [testing](#testing)                                                                      |
+| `test:watch`        | Runs `test` in watch mode to re-run tests when changed                                                                  |
+| `lint`              | [Lints](http://stackoverflow.com/questions/8503559/what-is-linting) the project for potential errors                    |
+| `lint:fix`          | Lints the project and [fixes all correctable errors](http://eslint.org/docs/user-guide/command-line-interface.html#fix) |
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+[Husky](https://github.com/typicode/husky) is used to enable `prepush` hook capability. The `prepush` script currently runs `eslint`, which will keep you from pushing if there is any lint within your code. If you would like to disable this, remove the `prepush` script from the `package.json`.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Config Files
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+There are multiple configuration files:
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- Firebase Project Configuration - `.firebaserc`
+- Local Project Configuration - `.env.local`
+- Local Cloud Functions Configuration - `functions/.runtimeconfig.json`
 
-## Learn More
+More details in the [Application Structure Section](#application-structure)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Application Structure
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The application structure presented in this boilerplate is **fractal**, where functionality is grouped primarily by feature rather than file type. Please note, however, that this structure is only meant to serve as a guide, it is by no means prescriptive. That said, it aims to represent generally accepted guidelines and patterns for building scalable applications.
 
-### Code Splitting
+```
+├── .github                      # All Github configuration
+│   ├── workflows                # Github Actions CI Workflows
+│   │  ├── deploy.yml            # Deploy workflow (deploys when pushing to specific branches)
+│   │  └── verify.yml            # Paths for application routes
+│   └── PULL_REQUEST_TEMPLATE.md # Main HTML page container for app
+├── functions                    # Cloud Functions
+│   ├── src                      # Cloud Functions Source code (each folder represents a function)
+│   ├── .runtimeconfig.json      # Cloud Functions local configuration
+│   └── index.js                 # Mount point of Cloud Functions (loads functions by name)
+├── public                       # All build-related configuration
+│   ├── firebase-messaging-sw.js # Service worker for Firebase Cloud Messaging
+│   └── index.html               # Main HTML page container for app
+├── src                          # Application source code
+│   ├── components               # Global Reusable Presentational Components
+│   ├── constants                # Project constants such as firebase paths and form names
+│   │  ├── firebasePaths.js      # Paths within Firebase (i.e. Collections + Sub-Collections)
+│   │  └── paths.js              # Paths for application routes
+│   ├── containers               # Global Reusable Container Components
+│   ├── layouts                  # Components that dictate major page structure
+│   │   └── CoreLayout           # Global application layout in which routes are rendered
+│   ├── routes                   # Main route definitions and async split points
+│   │   ├── index.js             # Bootstrap main application routes
+│   │   └── Home                 # Fractal route
+│   │       ├── index.js         # Route definitions and async split points
+│   │       ├── components       # Presentational React Components
+│   │       └── routes/**        # Fractal sub-routes (** optional)
+│   ├── store                    # Redux-specific pieces
+│   │   ├── createStore.js       # Create and instrument redux store
+│   │   └── reducers.js          # Reducer registry and injection
+│   └── utils                    # General Utilities (used throughout application)
+│       ├── components.js        # Utilities for building/implementing React components
+│       ├── form.js              # Utilities for forms (validation)
+│       └── router.js            # Utilities for routing such as those that redirect back to home if not logged in
+├── .env.local                   # Local Environment settings (automatically loaded up by react-scripts commands)
+├── .eslintignore                # ESLint ignore file
+├── .eslintrc.js                 # ESLint configuration
+├── .firebaserc                  # Firebase Project configuration settings (including ci settings)
+├── database.rules.json          # Rules for Firebase Real Time Database
+├── firebase.json                # Firebase Service settings (Hosting, Functions, etc)
+├── firestore.indexes.json       # Indexes for Cloud Firestore
+├── firestore.rules              # Rules for Cloud Firestore
+└── storage.rules                # Rules for Cloud Storage For Firebase
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Routing
 
-### Analyzing the Bundle Size
+We use `react-router-dom` [route matching](https://reacttraining.com/react-router/web/guides/basic-components/route-matching) (`<route>/index.js`) to define units of logic within our application. The application routes are defined within `src/routes/index.js`, which loads route settings which live in each route's `index.js`. The component with the suffix `Page` is the top level component of each route (i.e. `HomePage` is the top level component for `Home` route).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+There are two types of routes definitions:
 
-### Making a Progressive Web App
+### Sync Routes
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+The most simple way to define a route is a simple object with `path` and `component`:
 
-### Advanced Configuration
+_src/routes/Home/index.js_
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```js
+import HomePage from "./components/HomePage";
 
-### Deployment
+// Sync route definition
+export default {
+  path: "/",
+  component: HomePage,
+};
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Async Routes
 
-### `yarn build` fails to minify
+Routes can also be seperated into their own bundles which are only loaded when visiting that route, which helps decrease the size of your main application bundle. Routes that are loaded asynchronously are defined using `loadable` function which uses `React.lazy` and `React.Suspense`:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+_src/routes/NotFound/index.js_
+
+```js
+import loadable from "utils/components";
+
+// Async route definition
+export default {
+  path: "*",
+  component: loadable(() =>
+    import(/* webpackChunkName: 'NotFound' */ "./components/NotFoundPage")
+  ),
+};
+```
+
+With this setting, the name of the file (called a "chunk") is defined as part of the code as well as a loading spinner showing while the bundle file is loading.
+
+More about how routing works is available in [the react-router-dom docs](https://reacttraining.com/react-router/web/guides/quick-start).
+## Deployment
+
+Build code before deployment by running `yarn build`. There are multiple options below for types of deployment, if you are unsure, checkout the Firebase section.
+
+Before starting make sure to install Firebase Command Line Tool: `npm i -g firebase-tools`
+
+#### CI Deploy (recommended)
+
+**Note**: Config for this is located within `.github/workflows`
+
+`firebase-ci` has been added to simplify the CI deployment process. All that is required is providing authentication with Firebase:
+
+1. Login: `firebase login:ci` to generate an authentication token (will be used to give CI rights to deploy on your behalf)
+1. Set `FIREBASE_TOKEN` environment variable within CI environment
+1. Run a build on CI
+
+If you would like to deploy to different Firebase instances for different branches (i.e. `prod`), change `ci` settings within `.firebaserc`.
+
+For more options on CI settings checkout the [firebase-ci docs](https://github.com/prescottprue/firebase-ci)
+
+#### Manual deploy
+
+1. Run `firebase:login`
+1. Initialize project with `firebase init` then answer:
+   - What file should be used for Database Rules? -> `database.rules.json`
+   - What do you want to use as your public directory? -> `build`
+   - Configure as a single-page app (rewrite all urls to /index.html)? -> `Yes`
+   - What Firebase project do you want to associate as default? -> **your Firebase project name**
+1. Build Project: `yarn build`
+1. Confirm Firebase config by running locally: `yarn emulators:hosting`
+1. Deploy to Firebase (everything including Hosting and Functions): `firebase deploy`
+
+**NOTE:** You can use `yarn emulators:hosting` to test how your application will work when deployed to Firebase, but make sure you run `yarn build` first.
+
+## FAQ
+
+1. Why node `12` instead of a newer version?
+
+[Cloud Functions runtime runs on `12`](https://cloud.google.com/functions/docs/concepts/nodejs-runtime), which is why that is what is used for the CI build version.
+
+[build-status-image]: https://img.shields.io/github/workflow/status/plamen1982/ecpfsb-alfa/Deploy?style=flat-square
+[build-status-url]: https://github.com/plamen1982/ecpfsb-alfa/actions
+[coverage-image]: https://img.shields.io/codecov/c/github/plamen1982/ecpfsb-alfa.svg?style=flat-square
+[coverage-url]: https://codecov.io/gh/plamen1982/ecpfsb-alfa
+[license-image]: https://img.shields.io/github/license/plamen1982/ecpfsb-alfa?style=flat-square
+[license-url]: https://github.com/plamen1982/ecpfsb-alfa/blob/master/LICENSE
+[code-style-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square
+[code-style-url]: http://standardjs.com/

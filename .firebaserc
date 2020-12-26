@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "ecpfsb-alfa",
+    "master": "ecpfsb-alfa",
+    "prod": "ecpfsb-alfa"
+  }
+}
