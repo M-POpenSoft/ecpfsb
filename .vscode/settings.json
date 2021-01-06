@@ -1,0 +1,13 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+"json.schemas": [],
+"prettier.trailingComma": "none",
+"prettier.jsxSingleQuote": true,
+"prettier.singleQuote": true,
+"javascript.format.semicolons": "remove",
+"typescript.format.semicolons": "remove",
+"files.autoSave": "afterDelay",
+"prettier.semi": false,
+"prettier.jsxBracketSameLine": true
+}
